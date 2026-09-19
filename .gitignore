@@ -1,4 +1,9 @@
 .claude
 .vscode
-**.txt
-**.md
+*.txt
+*.md
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.pytest_cache/

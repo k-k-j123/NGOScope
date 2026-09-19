@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CharityLens — NGO Credibility Check</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <div class="brand">
+        <span class="brand__logo" aria-hidden="true">◉</span>
+        <span class="brand__name">CharityLens</span>
+      </div>
+      <span id="health-badge" class="health-badge" title="API status">checking…</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Is this Indian NGO trustworthy?</h1>
+      <p>
+        CharityLens searches live Google + Google News via SerpAPI and scores an
+        NGO&rsquo;s credibility from web signals — no offline datasets.
+      </p>
+    </section>
+
+    <section class="card">
+      <form id="lookup-form" autocomplete="off">
+        <div class="form-row">
+          <label class="field field--grow">
+            <span class="field__label">NGO name</span>
+            <input id="ngo-name" type="text" placeholder="e.g. Pratham, Goonj, Akshaya Patra" required />
+          </label>
+          <label class="field">
+            <span class="field__label">State (optional)</span>
+            <input id="ngo-state" type="text" placeholder="e.g. Delhi, Maharashtra" />
+          </label>
+          <label class="field field--num">
+            <span class="field__label">Results</span>
+            <input id="max-results" type="number" min="1" max="10" value="5" />
+          </label>
+          <button id="analyze-btn" class="btn btn--primary" type="submit">Analyze</button>
+        </div>
+      </form>
+      <div class="examples">
+        <span class="examples__label">Try:</span>
+        <button class="chip" type="button" data-example="Pratham">Pratham</button>
+        <button class="chip" type="button" data-example="The Akshaya Patra Foundation">Akshaya Patra</button>
+        <button class="chip" type="button" data-example="Goonj">Goonj</button>
+        <button class="chip" type="button" data-example="Teach For India">Teach For India</button>
+      </div>
+    </section>
+
+    <section id="status" class="status" hidden></section>
+
+    <section id="results" class="results" hidden>
+      <div class="tabs" role="tablist">
+        <button class="tab is-active" data-tab="report" type="button" role="tab" aria-selected="true">Credibility report</button>
+        <button class="tab" data-tab="web" type="button" role="tab" aria-selected="false">Web search</button>
+        <button class="tab" data-tab="news" type="button" role="tab" aria-selected="false">News search</button>
+      </div>
+
+      <div id="tab-report" class="tab-pane is-active">
+        <div class="report">
+          <div class="score-card">
+            <div id="score-value" class="score-value">&mdash;</div>
+            <div id="score-verdict" class="verdict-badge"></div>
+            <div class="score-bar"><div id="score-bar-fill" class="score-bar__fill"></div></div>
+            <div id="sentiment" class="sentiment"></div>
+          </div>
+          <div class="report-body">
+            <h3 id="report-title">Report</h3>
+            <p id="report-error" class="error-text" hidden></p>
+            <p id="explanation" class="explanation"></p>
+            <ul id="signals" class="signals"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-web" class="tab-pane">
+        <ol id="web-results" class="result-list"></ol>
+        <p id="web-empty" class="empty" hidden></p>
+      </div>
+
+      <div id="tab-news" class="tab-pane">
+        <ul id="news-results" class="result-list result-list--news"></ul>
+        <p id="news-empty" class="empty" hidden></p>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <p>
+        Live web-reputation scoring via SerpAPI (≈2 searches per lookup on the free tier).
+        This is not a check of FCRA or legal registration status.
+      </p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

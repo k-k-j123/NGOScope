@@ -1,164 +1,78 @@
 # CharityLens
 
-AI-Powered NGO Trust & Transparency Platform for Indian Non-Profits
+AI-Powered NGO Trust & Transparency Platform for Indian Non-Profits (live, light, SerpAPI-only).
 
 ## Overview
 
-CharityLens helps donors make informed decisions by analyzing publicly available NGO data from Indian government sources. It uses an MCP (Model Context Protocol) server to expose verified data tools, a retrieval-augmented context layer for dynamic information retrieval, and a two-agent pipeline for structured analysis and donor-friendly explanations.
+Type an NGO name → CharityLens searches the live web (Google organic + Google News) via SerpAPI, and produces a credibility score with an explanation. No offline datasets, no fragile HTML scraping, no heavy dependencies — FastAPI + httpx + a few hundred lines.
 
-The entire system is designed to run on minimal hardware (< 512 MB RAM, SQLite, FastAPI) — suitable for Raspberry Pi, low-cost VPS, or local machines.
+## Quick Start
 
----
-
-## Key Features
-
-- **MCP Server**: Wraps all NGO data interactions (FCRA, 80G, annual filings, news sentiment) as discrete, testable tools via JSON-RPC-style endpoints.
-- **Real Indian NGO Datasets**: Ingests and normalizes data from NGO Darpan, FCRA Portal, MCA, OpenBudgets India, and GuideStar India.
-- **Retrieval-Augmented Context**: BM25 / TF-IDF / semantic search (FAISS + DistilBERT) to dynamically retrieve relevant NGO records.
-- **Two-Agent Pipeline**:
-  - **Collector Agent**: Calls MCP tools, validates records, and outputs structured JSON.
-  - **Analyst Agent**: Runs rule-based risk scoring and generates donor-friendly explanations (English / Hindi).
-- **Responsible AI**: Bias analysis for rural/small NGOs, uncertainty flags, and a MODEL_CARD.md documenting limitations.
-- **Lightweight Deployment**: SQLite + FTS5, FastAPI, optional 4-bit quantized open models (Phi-3 Mini, TinyLlama).
-
----
-
-## High-Level Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      User / LLM Interface                   │
-│  (ask about an NGO by name, PAN, or FCRA number)           │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     Analyst / Explainer Agent               │
-│  ─ Rule-based risk scoring                                  │
-│  ─ Donor-friendly explanation generation (EN / HI)          │
-│  ─ Uncertainty flags                                        │
-└──────────────────────────────┬──────────────────────────────┘
-                               │  structured JSON
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                       Collector Agent                       │
-│  ─ Calls MCP tools                                         │
-│  ─ Validates FCRA status, 80G, filings, audit reports      │
-│  ─ Outputs structured record                               │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     MCP Server (FastAPI + Uvicorn)          │
-│  ─ get_fcra_registration   ─ check_fcra_status             │
-│  ─ get_financial_summary   ─ get_annual_filings            │
-│  ─ get_80g_status          ─ check_adverse_media           │
-│  ─ search_ngo_by_name      ─ get_registration_details      │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Retrieval Layer (RAG)                     │
-│  ─ BM25 / TF-IDF  (lightweight)                            │
-│  ─ Sentence Transformers + FAISS (semantic)                 │
-│  ─ Top-K record retrieval → structured context injection    │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│               SQLite + FTS5 / FAISS Vector Store            │
-│  ─ Normalized, merged records from government sources      │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    ETL Pipeline (Python + Pandas)           │
-│  ─ Pull CSV snapshots nightly (or bundle with repo)        │
-│  ─ Clean, normalize, merge across sources                  │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  Public Data Sources                        │
-│  ─ NGO Darpan (NITI Aayog)                                 │
-│  ─ FCRA Portal (MHA)                                       │
-│  ─ Ministry of Corporate Affairs (MCA)                     │
-│  ─ OpenBudgets India                                       │
-│  ─ GuideStar India                                         │
-└─────────────────────────────────────────────────────────────┘
+```bash
+uv sync                              # creates .venv + uv.lock
+export SERPAPI_KEY="<your key from serpapi.com>"
 ```
 
----
+**CLI demo:**
 
-## Risk Scoring Heuristic
-
-| Condition                   | Score |
-| --------------------------- | ----- |
-| Missing annual filing       | -20   |
-| Missing audit report        | -15   |
-| FCRA suspended              | -50   |
-| Negative media coverage     | -15   |
-| Valid 80G                   | +10   |
-| Consistent filings          | +20   |
-
-Scores are advisory. Bias analysis is performed across states and NGO sizes to reduce false negatives for small/rural organizations.
-
----
-
-## Data Sources
-
-| Source             | What It Provides                                  |
-| ------------------ | ------------------------------------------------- |
-| NGO Darpan         | Registrations, sectors, registration numbers      |
-| FCRA Portal        | FCRA registrations, suspended/cancelled orgs      |
-| MCA                | Section 8 company filings (AOC-4, MGT-7)         |
-| OpenBudgets India  | Budget and expenditure data                       |
-| GuideStar India    | Additional organizational metadata                |
-
-All data is publicly available government records. No personal donor data or private information is collected.
-
----
-
-## Repository Structure
-
-```
-project-root/
-├── mcp_server/
-│   ├── main.py            # FastAPI app, MCP tool registration
-│   ├── tools.py           # Tool implementations
-│   └── routes.py          # JSON-RPC endpoints
-│
-├── data_pipeline/
-│   ├── etl.py             # Nightly/bundled data ingestion
-│   ├── cleaner.py         # Normalization, deduplication
-│   └── loaders.py         # Source-specific loaders
-│
-├── agents/
-│   ├── collector.py       # MCP tool caller, record validation
-│   ├── analyst.py         # Risk scoring, explanation generation
-│   └── prompts.py         # Prompt templates (EN / HI)
-│
-├── eval/
-│   ├── tests.py           # Pytest test suite
-│   └── metrics.py         # Scoring and bias metrics
-│
-├── data/                  # Processed SQLite DBs, FAISS indices
-│
-├── MODEL_CARD.md          # Limitations, intended use, bias notes
-├── README.md
-├── CONTRIBUTING.md
-├── LICENSE
-└── requirements.txt
+```bash
+uv run charitylens lookup "Pratham"                 # no state filter
+uv run charitylens lookup "Goonj" --state Delhi    # with state
 ```
 
----
+**MCP server + web UI:**
 
-## Responsible AI
+```bash
+uv run uvicorn mcp_server.main:app --reload
+# open http://localhost:8000/ for the web UI
+curl -s localhost:8000/tools                          # list the 3 tools
+curl -s -X POST localhost:8000/tools/analyze_ngo_credibility \
+  -H 'content-type: application/json' -d '{"ngo_name":"Pratham"}'
+```
 
-- **Data**: Only public government records. No private donor data.
-- **Bias**: Disparity analysis by state and NGO size; penalties reduced for delayed filings where appropriate.
-- **Uncertainty**: Clearly flagged when data is incomplete or outdated.
-- **Model Card**: See [MODEL_CARD.md](MODEL_CARD.md) for intended use, limitations, and bias notes.
+The web UI (`frontend/`) is a static single page (HTML + CSS + JS, no build step) served by FastAPI from the root. It runs `analyze_ngo_credibility` from the browser and shows the score, verdict, signals, explanation, and the raw web/news results.
 
----
+## uv Commands
 
+| Command | What it does |
+|---|---|
+| `uv sync` | Create `.venv` + `uv.lock`, install project + dev deps |
+| `uv run charitylens lookup "Pratham"` | Run the CLI demo |
+| `uv run python -m charitylens lookup "Pratham"` | Same as above (module form) |
+| `uv run uvicorn mcp_server.main:app --reload` | Start the MCP server |
+| `uv run pytest` | Run the test suite (offline, SerpAPI mocked) |
+| `uv run python -c "..."` | Run any Python snippet in the env |
+| `uv add <package>` | Add a dependency and update `uv.lock` |
+| `uv remove <package>` | Remove a dependency |
+| `uv lock` | Regenerate `uv.lock` without installing |
+| `uv sync --upgrade` | Update deps to latest matching versions |
+| `uv sync --reinstall` | Force reinstall of all packages |
+
+Add dev-only dependencies with `uv add --dev <package>` → they land in `[dependency-groups].dev`.
+
+## Architecture
+
+```
+CLI / HTTP  →  FastAPI MCP server  →  tools.py (3 tools)
+                                        └─ serpapi_search.py  →  SerpAPI (Google Search + Google News)
+```
+
+`routes.py` dispatches by tool name via `inspect.signature`; each tool is an async function returning a dict and never raising — failures are folded into an `error` key.
+
+## Tools
+
+| Tool | Engine | Returns |
+|---|---|---|
+| `search_ngo_web_info(ngo_name, state, max_results)` | `google` organic | title/link/snippet results |
+| `search_adverse_media(ngo_name, state, max_results)` | `tbm=nws` news | articles + keyword sentiment |
+| `analyze_ngo_credibility(ngo_name, state, max_results)` | web + news | score 0-100, verdict, signals, explanation |
+
+## Scoring
+
+Base 50; +20 official website detected; +10 any web presence; -30 negative media; +10 neutral coverage; clamped 0-100. Verdict: `trustworthy` (≥70), `caution` (40-69), `investigate` (<40).
+
+## Notes
+
+- Free SerpAPI tier: 250 searches/month, 50/hour (~2 searches per lookup).
+- Report is live web-reputation based; it does not check FCRA/registration status.
+- Run tests offline: `uv run pytest`. No key needed (SerpAPI calls are mocked).
