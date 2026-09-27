@@ -1,6 +1,13 @@
 import os
 import httpx
+from dotenv import load_dotenv
 from typing import Optional
+
+# Load a local .env if one exists, so the key does not have to be exported by
+# hand for every entry point (server, CLI, tests). load_dotenv() does NOT
+# override variables already in the environment, so a real SERPAPI_KEY from CI,
+# docker or `$env:SERPAPI_KEY` still takes precedence over the file.
+load_dotenv()
 
 SERPAPI_URL = "https://serpapi.com/search.json"
 SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "")

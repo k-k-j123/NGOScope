@@ -3,99 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CharityLens — NGO Credibility Check</title>
+  <title>NGOScope — Credibility Intelligence</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://api.fontshare.com/v2/css?f[]=geist@400,500,700&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=instrument-serif@400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-  <header class="topbar">
-    <div class="wrap topbar__inner">
-      <div class="brand">
-        <span class="brand__logo" aria-hidden="true">◉</span>
-        <span class="brand__name">CharityLens</span>
-      </div>
-      <span id="health-badge" class="health-badge" title="API status">checking…</span>
+<body class="py-12">
+  <header class="wrap mb-24 flex justify-between items-center">
+    <div class="flex items-center gap-2">
+        <span class="font-bold text-lg">NGOScope</span>
     </div>
+    <div id="health-badge" class="badge">System: Online</div>
   </header>
 
   <main class="wrap">
-    <section class="hero">
-      <h1>Is this Indian NGO trustworthy?</h1>
-      <p>
-        CharityLens searches live Google + Google News via SerpAPI and scores an
-        NGO&rsquo;s credibility from web signals — no offline datasets.
-      </p>
+    <section class="max-w-4xl animate-scroll-reveal">
+      <h1 class="text-6xl md:text-8xl mb-8">Credibility <br> intelligence.</h1>
+      <p class="text-xl text-[var(--muted)] mb-12">Assessing Indian NGOs through live web signals.</p>
     </section>
 
-    <section class="card">
-      <form id="lookup-form" autocomplete="off">
-        <div class="form-row">
-          <label class="field field--grow">
-            <span class="field__label">NGO name</span>
-            <input id="ngo-name" type="text" placeholder="e.g. Pratham, Goonj, Akshaya Patra" required />
-          </label>
-          <label class="field">
-            <span class="field__label">State (optional)</span>
-            <input id="ngo-state" type="text" placeholder="e.g. Delhi, Maharashtra" />
-          </label>
-          <label class="field field--num">
-            <span class="field__label">Results</span>
-            <input id="max-results" type="number" min="1" max="10" value="5" />
-          </label>
-          <button id="analyze-btn" class="btn btn--primary" type="submit">Analyze</button>
+    <section class="card mb-24 animate-scroll-reveal">
+      <form id="lookup-form" class="space-y-6">
+        <div class="grid md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-[var(--muted)] mb-2">NGO Name</label>
+                <input id="ngo-name" type="text" class="w-full border border-[var(--line)] p-3 rounded" placeholder="e.g. Pratham" required />
+            </div>
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-[var(--muted)] mb-2">State (optional)</label>
+                <input id="ngo-state" type="text" class="w-full border border-[var(--line)] p-3 rounded" placeholder="e.g. Delhi" />
+            </div>
         </div>
+        <button id="analyze-btn" class="btn-primary w-full md:w-auto">Analyze NGO</button>
       </form>
-      <div class="examples">
-        <span class="examples__label">Try:</span>
-        <button class="chip" type="button" data-example="Pratham">Pratham</button>
-        <button class="chip" type="button" data-example="The Akshaya Patra Foundation">Akshaya Patra</button>
-        <button class="chip" type="button" data-example="Goonj">Goonj</button>
-        <button class="chip" type="button" data-example="Teach For India">Teach For India</button>
-      </div>
+      <p id="status" class="status" hidden></p>
     </section>
 
-    <section id="status" class="status" hidden></section>
-
-    <section id="results" class="results" hidden>
-      <div class="tabs" role="tablist">
-        <button class="tab is-active" data-tab="report" type="button" role="tab" aria-selected="true">Credibility report</button>
-        <button class="tab" data-tab="web" type="button" role="tab" aria-selected="false">Web search</button>
-        <button class="tab" data-tab="news" type="button" role="tab" aria-selected="false">News search</button>
-      </div>
-
-      <div id="tab-report" class="tab-pane is-active">
-        <div class="report">
-          <div class="score-card">
-            <div id="score-value" class="score-value">&mdash;</div>
-            <div id="score-verdict" class="verdict-badge"></div>
-            <div class="score-bar"><div id="score-bar-fill" class="score-bar__fill"></div></div>
-            <div id="sentiment" class="sentiment"></div>
-          </div>
-          <div class="report-body">
-            <h3 id="report-title">Report</h3>
-            <p id="report-error" class="error-text" hidden></p>
-            <p id="explanation" class="explanation"></p>
-            <ul id="signals" class="signals"></ul>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab-web" class="tab-pane">
-        <ol id="web-results" class="result-list"></ol>
-        <p id="web-empty" class="empty" hidden></p>
-      </div>
-
-      <div id="tab-news" class="tab-pane">
-        <ul id="news-results" class="result-list result-list--news"></ul>
-        <p id="news-empty" class="empty" hidden></p>
-      </div>
+    <section id="results" class="animate-scroll-reveal" hidden>
+        <!-- Result Bento Grid -->
+        <div class="grid md:grid-cols-3 gap-6" id="result-grid"></div>
     </section>
-
-    <footer class="footer">
-      <p>
-        Live web-reputation scoring via SerpAPI (≈2 searches per lookup on the free tier).
-        This is not a check of FCRA or legal registration status.
-      </p>
-    </footer>
   </main>
 
   <script src="app.js"></script>

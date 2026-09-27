@@ -7,7 +7,7 @@ from mcp_server.tools import analyze_ngo_credibility
 def _render(report: dict) -> str:
     lines = []
     lines.append("=" * 56)
-    lines.append(f"CharityLens — {report.get('ngo_name', 'NGO')}")
+    lines.append(f"NGOScope — {report.get('ngo_name', 'NGO')}")
     lines.append("=" * 56)
 
     error = report.get("error")
@@ -50,7 +50,7 @@ def _render(report: dict) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="charitylens", description="NGO credibility lookup")
+    parser = argparse.ArgumentParser(prog="ngoscope", description="NGO credibility lookup")
     parser.add_argument("ngo_name", nargs="+", help="NGO name to analyze")
     parser.add_argument("--state", default=None, help="Optional Indian state filter")
     parser.add_argument("--max-results", type=int, default=5, help="Results to fetch per engine")

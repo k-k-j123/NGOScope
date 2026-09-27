@@ -1,5 +1,5 @@
 [project]
-name = "charitylens"
+name = "ngoscope"
 version = "0.2.0"
 description = "AI NGO trust/transparency platform for Indian non-profits (SerpAPI-only, live)"
 readme = "README.md"
@@ -8,6 +8,7 @@ dependencies = [
     "fastapi>=0.104.0",
     "uvicorn[standard]>=0.24.0",
     "httpx>=0.25.0",
+    "python-dotenv>=1.0.0",
 ]
 
 [dependency-groups]
@@ -17,7 +18,7 @@ dev = [
 ]
 
 [project.scripts]
-charitylens = "charitylens.cli:main"
+ngoscope = "charitylens.cli:main"
 
 [build-system]
 requires = ["hatchling"]

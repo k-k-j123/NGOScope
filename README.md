@@ -1,10 +1,10 @@
-# CharityLens
+# NGOScope
 
 AI-Powered NGO Trust & Transparency Platform for Indian Non-Profits (live, light, SerpAPI-only).
 
 ## Overview
 
-Type an NGO name → CharityLens searches the live web (Google organic + Google News) via SerpAPI, and produces a credibility score with an explanation. No offline datasets, no fragile HTML scraping, no heavy dependencies — FastAPI + httpx + a few hundred lines.
+Type an NGO name → NGOScope searches the live web (Google organic + Google News) via SerpAPI, and produces a credibility score with an explanation. No offline datasets, no fragile HTML scraping, no heavy dependencies — FastAPI + httpx + a few hundred lines.
 
 ## Quick Start
 
@@ -16,8 +16,8 @@ export SERPAPI_KEY="<your key from serpapi.com>"
 **CLI demo:**
 
 ```bash
-uv run charitylens lookup "Pratham"                 # no state filter
-uv run charitylens lookup "Goonj" --state Delhi    # with state
+uv run ngoscope lookup "Pratham"                 # no state filter
+uv run ngoscope lookup "Goonj" --state Delhi    # with state
 ```
 
 **MCP server + web UI:**
@@ -37,7 +37,7 @@ The web UI (`frontend/`) is a static single page (HTML + CSS + JS, no build step
 | Command | What it does |
 |---|---|
 | `uv sync` | Create `.venv` + `uv.lock`, install project + dev deps |
-| `uv run charitylens lookup "Pratham"` | Run the CLI demo |
+| `uv run ngoscope lookup "Pratham"` | Run the CLI demo |
 | `uv run python -m charitylens lookup "Pratham"` | Same as above (module form) |
 | `uv run uvicorn mcp_server.main:app --reload` | Start the MCP server |
 | `uv run pytest` | Run the test suite (offline, SerpAPI mocked) |

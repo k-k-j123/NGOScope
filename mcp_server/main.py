@@ -12,13 +12,13 @@ FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("CharityLens MCP Server starting...")
+    print("NGOScope MCP Server starting...")
     yield
-    print("CharityLens MCP Server shutting down...")
+    print("NGOScope MCP Server shutting down...")
 
 
 app = FastAPI(
-    title="CharityLens MCP Server",
+    title="NGOScope MCP Server",
     description="AI-Powered NGO Trust & Transparency Platform - Tool Layer",
     version="0.2.0",
     lifespan=lifespan,
